@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Quiz Master</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(to right, #f9f9f9, #e0eafc);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    header {
+      background-color: #5a67d8;
+      width: 100%;
+      padding: 20px;
+      color: white;
+      text-align: center;
+      font-size: 28px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .setup-container {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+      margin-top: 30px;
+      text-align: center;
+      max-width: 600px;
+    }
+
+    .setup-container label {
+      font-weight: bold;
+      display: block;
+      margin-top: 10px;
+    }
+
+    .setup-container select,
+    .setup-container input {
+      margin: 10px;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+
+    .quiz-container {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+      max-width: 600px;
+      width: 90%;
+      text-align: center;
+      margin-top: 20px;
+      display: none;
+      position: relative;
+    }
+
+    h1 {
+      color: #5a67d8;
+      margin-bottom: 10px;
+    }
+
+    .question {
+      font-size: 20px;
+      margin: 20px 0;
+    }
+
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .options button {
+      padding: 10px 20px;
+      font-size: 16px;
+      border: 2px solid #5a67d8;
+      background: white;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .options button:hover {
+      background: #5a67d8;
+      color: white;
+    }
+
+    .next-btn, .restart-btn, .try-again-btn, .next-level-btn {
+      padding: 10px 25px;
+      font-size: 16px;
+      border: none;
+      background: #48bb78;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+      display: none;
+      margin: 10px;
+    }
+
+    .restart-btn {
+      background: #ed8936;
+    }
+
+    .try-again-btn {
+      background: #4299e1;
+    }
+
+    .next-level-btn {
+      background: #805ad5;
+    }
+
+    .score {
+      font-size: 22px;
+      font-weight: bold;
+      color: #48bb78;
+      margin-top: 20px;
+    }
+
+    .progress {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #777;
+    }
+  </style>
+</head>
+<body>
+  <header>🧠 Quiz Master</header>
+
+  <div class="setup-container">
+    <h2>Setup Your Quiz</h2>
+    <label for="category">Select Topic:</label>
+    <select id="category">
+      <option value="general">General</option>
+      <option value="web">Web Development</option>
+      <option value="math">Math</option>
+    </select>
+
+    <label for="questionCount">Number of Questions (1-10):</label>
+    <input type="number" id="questionCount" min="1" max="10" value="5" />
+    <br>
+    <button onclick="startQuiz()">Start Quiz</button>
+  </div>
+
+  <div class="quiz-container" id="quizBox">
+    <h1>Quiz Master</h1>
+    <div id="question" class="question">Loading question...</div>
+    <div class="options" id="options"></div>
+    <button class="next-btn" id="nextBtn">Next</button>
+    <button class="restart-btn" id="restartBtn" onclick="restartQuiz()">Restart</button>
+    <button class="try-again-btn" id="tryAgainBtn" onclick="startQuiz()">Try Again</button>
+    <button class="next-level-btn" id="nextLevelBtn" onclick="startHarderQuiz()">Next Level</button>
+    <div class="score" id="score"></div>
+    <div class="progress" id="progress"></div>
+  </div>
+
+  <script>
+    const questions = {
+      general: [
+        { question: "What is the capital of France?", options: ["Madrid", "Paris", "Berlin", "Rome"], answer: "Paris" },
+        { question: "Which planet is known as the Red Planet?", options: ["Earth", "Mars", "Jupiter", "Saturn"], answer: "Mars" },
+        { question: "What is the capital of Japan?", options: ["Seoul", "Tokyo", "Beijing", "Osaka"], answer: "Tokyo" },
+        { question: "What is the largest ocean on Earth?", options: ["Atlantic", "Indian", "Pacific", "Arctic"], answer: "Pacific" }
+      ],
+      web: [
+        { question: "Which language is used for styling web pages?", options: ["HTML", "JQuery", "CSS", "XML"], answer: "CSS" },
+        { question: "Who developed React?", options: ["Google", "Facebook", "Twitter", "Microsoft"], answer: "Facebook" },
+        { question: "CSS stands for?", options: ["Cascading Style Sheets", "Creative Style Sheets", "Colorful Style Sheets", "Computer Style Sheets"], answer: "Cascading Style Sheets" },
+        { question: "What does HTML stand for?", options: ["Hyper Text Markup Language", "High Text Machine Language", "Hyper Tabular Markup Language", "None"], answer: "Hyper Text Markup Language" }
+      ],
+      math: [
+        { question: "What is 2 + 2?", options: ["3", "4", "5", "6"], answer: "4" },
+        { question: "What is the square root of 49?", options: ["5", "6", "7", "8"], answer: "7" },
+        { question: "What is 10 x 10?", options: ["100", "1000", "10", "110"], answer: "100" },
+        { question: "What is the square root of 16?", options: ["3", "4", "5", "6"], answer: "4" }
+      ],
+      hard: [
+        { question: "What is the derivative of sin(x)?", options: ["cos(x)", "-cos(x)", "-sin(x)", "tan(x)"], answer: "cos(x)" },
+        { question: "Who created the World Wide Web?", options: ["Tim Berners-Lee", "Bill Gates", "Steve Jobs", "Mark Zuckerberg"], answer: "Tim Berners-Lee" },
+        { question: "What is 12^2?", options: ["144", "124", "132", "156"], answer: "144" },
+        { question: "What does SQL stand for?", options: ["Structured Query Language", "Simple Query Logic", "System Query Language", "Style Quality Language"], answer: "Structured Query Language" }
+      ]
+    };
+
+    let quizData = [];
+    let currentQuestion = 0;
+    let score = 0;
+
+    const questionEl = document.getElementById('question');
+    const optionsEl = document.getElementById('options');
+    const nextBtn = document.getElementById('nextBtn');
+    const restartBtn = document.getElementById('restartBtn');
+    const tryAgainBtn = document.getElementById('tryAgainBtn');
+    const nextLevelBtn = document.getElementById('nextLevelBtn');
+    const scoreEl = document.getElementById('score');
+    const progressEl = document.getElementById('progress');
+    const quizBox = document.getElementById('quizBox');
+
+    function startQuiz(category = null) {
+      const count = Math.min(10, parseInt(document.getElementById('questionCount').value));
+      const selectedCategory = category || document.getElementById('category').value;
+      quizData = shuffle([...questions[selectedCategory]]);
+      while (quizData.length < count) {
+        quizData = quizData.concat(shuffle([...questions[selectedCategory]]));
+      }
+      quizData = quizData.slice(0, count);
+      currentQuestion = 0;
+      score = 0;
+      document.querySelector('.setup-container').style.display = 'none';
+      quizBox.style.display = 'block';
+      loadQuestion();
+    }
+
+    function startHarderQuiz() {
+      startQuiz('hard');
+    }
+
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    function loadQuestion() {
+      const current = quizData[currentQuestion];
+      questionEl.textContent = current.question;
+      optionsEl.innerHTML = '';
+      scoreEl.textContent = '';
+      nextBtn.style.display = 'none';
+      restartBtn.style.display = 'none';
+      tryAgainBtn.style.display = 'none';
+      nextLevelBtn.style.display = 'none';
+      progressEl.textContent = `Question ${currentQuestion + 1} of ${quizData.length}`;
+
+      current.options.forEach(option => {
+        const button = document.createElement('button');
+        button.textContent = option;
+        button.onclick = () => selectAnswer(button, current.answer);
+        optionsEl.appendChild(button);
+      });
+    }
+
+    function selectAnswer(button, correctAnswer) {
+      const buttons = optionsEl.querySelectorAll('button');
+      buttons.forEach(btn => btn.disabled = true);
+      if (button.textContent === correctAnswer) {
+        button.style.backgroundColor = '#48bb78';
+        button.style.color = 'white';
+        score++;
+      } else {
+        button.style.backgroundColor = '#f56565';
+        button.style.color = 'white';
+        buttons.forEach(btn => {
+          if (btn.textContent === correctAnswer) {
+            btn.style.backgroundColor = '#48bb78';
+            btn.style.color = 'white';
+          }
+        });
+      }
+      nextBtn.style.display = 'inline-block';
+    }
+
+    nextBtn.addEventListener('click', () => {
+      currentQuestion++;
+      if (currentQuestion < quizData.length) {
+        loadQuestion();
+      } else {
+        showScore();
+      }
+    });
+
+    function showScore() {
+      questionEl.textContent = 'Quiz Completed!';
+      optionsEl.innerHTML = '';
+      nextBtn.style.display = 'none';
+      restartBtn.style.display = 'inline-block';
+      tryAgainBtn.style.display = 'inline-block';
+      nextLevelBtn.style.display = 'inline-block';
+      scoreEl.textContent = `Your Score: ${score} / ${quizData.length}`;
+      progressEl.textContent = '';
+    }
+
+    function restartQuiz() {
+      document.querySelector('.setup-container').style.display = 'block';
+      quizBox.style.display = 'none';
+    }
+  </script>
+</body>
+</html>
